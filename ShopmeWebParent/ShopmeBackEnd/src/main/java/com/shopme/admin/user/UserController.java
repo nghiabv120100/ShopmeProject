@@ -3,6 +3,7 @@ package com.shopme.admin.user;
 import com.shopme.admin.FileUploadUtil;
 import com.shopme.common.entity.Role;
 import com.shopme.common.entity.User;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
@@ -78,10 +79,15 @@ public class UserController {
             FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
         } else {
             if (user.getPhotos() != null && user.getPhotos().isBlank()) {user.setPhotos(null);}
-//            service.save(user);
+            service.save(user);
         }
         redirectAttributes.addFlashAttribute("message", "The user has been saved successfully");
-        return "redirect:/users";
+        return getRedirectUrlToAffectedUser(user);
+    }
+
+    private String getRedirectUrlToAffectedUser(User user) {
+        String firstPartOfEmail = user.getEmail().split("@")[0];
+        return "redirect:/users/page/1?sortField=id&sortDir=asc&keyword=" + firstPartOfEmail;
     }
 
     @GetMapping("/users/edit/{id}")
@@ -124,6 +130,19 @@ public class UserController {
         }
     }
 
+    @GetMapping("users/export/csv")
+    public void exportToCSV(HttpServletResponse resp) throws IOException {
+        List<User> listUsers = service.listAll();
+        UserCsvExporter exporter = new UserCsvExporter();
+        exporter.export(listUsers, resp);
+    }
+
+    @GetMapping("users/export/excel")
+    public void exportToExcel(HttpServletResponse resp) throws IOException {
+        List<User> listUsers = service.listAll();
+        UserExcelExporter exporter = new UserExcelExporter();
+        exporter.export(listUsers, resp);
+    }
 
 
 }

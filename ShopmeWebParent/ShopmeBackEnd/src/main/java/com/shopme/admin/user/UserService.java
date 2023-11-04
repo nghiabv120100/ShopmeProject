@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.print.DocFlavor;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -28,7 +27,7 @@ public class UserService {
     public static int USERS_PER_PAGE = 4;
 
     public List<User> listAll() {
-        return userRepo.findAll();
+        return userRepo.findAll(Sort.by("firstName").ascending());
     }
 
     public Page<User> listByPage(int pageNum, String sortField, String sortDir, String keyword) {
